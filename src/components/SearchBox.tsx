@@ -1,24 +1,24 @@
 import { useState, useRef, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { Product } from '../types/product';
-import { cn } from '../lib/utils';
+import { products } from '../data/products';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
-export interface SearchBoxProps {
-  products: Product[];
-  onProductSelect?: (product: Product) => void;
-  className?: string;
-}
-
-const SearchBox = ({ products, onProductSelect, className }: SearchBoxProps) => {
+const SearchBox = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsExpanded(false);
+        setSearchTerm('');
+        setFilteredProducts([]);
       }
     };
 
@@ -26,94 +26,111 @@ const SearchBox = ({ products, onProductSelect, className }: SearchBoxProps) => 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const term = e.target.value;
+  useEffect(() => {
+    if (isExpanded) {
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  }, [isExpanded]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const term = event.target.value;
     setSearchTerm(term);
 
-    if (term.trim()) {
-      const filtered = products.filter(product =>
-        product.name.toLowerCase().includes(term.toLowerCase())
-      );
-      setFilteredProducts(filtered);
-    } else {
-      setFilteredProducts([]);
-    }
+    const lowerCaseTerm = term.toLowerCase();
+    const filtered = products.filter(product =>
+      product.name.toLowerCase().includes(lowerCaseTerm)
+    );
+    setFilteredProducts(term ? filtered : []);
   };
 
-  const handleProductSelect = (product: Product) => {
-    const element = document.getElementById(`product-${product.id}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      // Отправляем событие productSelected
-      const event = new CustomEvent('productSelected', {
-        detail: { productId: product.id.toString() }
-      });
-      window.dispatchEvent(event);
-    }
-
-    // Сбрасываем состояние поиска
-    setSearchTerm('');
-    setFilteredProducts([]);
+  const handleProductSelect = (productId: string) => {
     setIsExpanded(false);
+    setSearchTerm('');
+    navigate(`/product/${productId}`);
+  };
 
-    if (onProductSelect) {
-      onProductSelect(product);
+  const inputContainerVariants = {
+    hidden: { 
+      width: 0, 
+      opacity: 0, 
+      paddingLeft: 0, 
+      paddingRight: 0,
+      transition: { duration: 0.3, ease: "easeInOut" }
+    },
+    visible: { 
+      width: '16rem',
+      opacity: 1,
+      paddingLeft: '1rem',
+      paddingRight: '1rem',
+      transition: { duration: 0.3, ease: "easeInOut" }
     }
   };
 
   return (
-    <div ref={searchRef} className={cn("relative", className)}>
-      <div className={cn(
-        'flex items-center transition-all duration-300',
-        isExpanded ? 'w-64' : 'w-40'
-      )}>
-        <div className="relative flex-1">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            onFocus={() => setIsExpanded(true)}
-            placeholder="Поиск..."
-            className="w-full pl-10 pr-4 py-2 text-sm bg-gray-100 border border-transparent rounded-lg focus:outline-none focus:border-blue-500"
-          />
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-        </div>
-      </div>
+    <div ref={searchRef} className="relative h-10 w-10 flex items-center justify-center">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full h-full flex items-center justify-center bg-surface rounded-lg border border-primary/20 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300 group z-10"
+        aria-label={isExpanded ? "Close search" : "Open search"}
+      >
+        <Search className={`w-4 h-4 transition-colors ${isExpanded ? 'text-primary' : 'text-text-secondary group-hover:text-primary'}`} />
+      </button>
 
-      {isExpanded && searchTerm.trim() && (
-        <div className="absolute z-50 w-96 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-96 overflow-auto">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map(product => (
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            key="search-input-container"
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={inputContainerVariants}
+            className="absolute top-0 right-0 h-full bg-surface rounded-lg border border-primary flex items-center overflow-hidden z-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <input
+              ref={inputRef}
+              type="text"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              placeholder="Поиск..."
+              className="w-full h-full bg-transparent text-white px-4 py-2 outline-none focus:ring-0 border-none"
+              aria-label="Search"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isExpanded && filteredProducts.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="absolute top-full right-0 w-64 mt-2 bg-surface border border-primary/20 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50"
+          >
+            {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                onClick={() => handleProductSelect(product)}
-                className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                className="p-2 hover:bg-primary/10 cursor-pointer flex items-center gap-2"
+                onClick={() => handleProductSelect(product.id)}
               >
-                <div className="w-12 h-12 flex-shrink-0 rounded-md overflow-hidden bg-gray-50">
-                  {product.images && product.images.length > 0 && (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">{product.name}</div>
-                  <div className="text-sm text-gray-500">{new Intl.NumberFormat('ru-RU', {
-                    style: 'currency',
-                    currency: 'RUB',
-                    maximumFractionDigits: 0
-                  }).format(product.price)}</div>
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className="w-12 h-12 object-cover rounded"
+                />
+                <div>
+                  <div className="text-white text-sm">{product.name}</div>
+                  <div className="text-primary text-xs">
+                    {product.price.toLocaleString()} ₽
+                  </div>
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="px-4 py-2 text-gray-500">Ничего не найдено</div>
-          )}
-        </div>
-      )}
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

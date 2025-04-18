@@ -9,7 +9,7 @@ interface ProductImageProps {
 }
 
 const ProductImage = ({ images, currentIndex, onDotClick, className }: ProductImageProps) => {
-  const currentImage = images[currentIndex] || '/placeholder.jpg';
+  const currentImage = images[currentIndex] || '/placeholder.svg';
 
   return (
     <div className={cn("relative aspect-square overflow-hidden rounded-lg bg-gray-100", className)}>

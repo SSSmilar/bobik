@@ -1,8 +1,9 @@
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
-type NotificationType = 'success' | 'error' | 'info' | 'warning';
+export type NotificationType = 'success' | 'error' | 'warning';
 
-interface NotificationOptions {
+export interface NotificationData {
+  id: string;
   title: string;
   message: string;
   type: NotificationType;
@@ -10,31 +11,31 @@ interface NotificationOptions {
 }
 
 export const useNotification = () => {
-  const showNotification = useCallback(({ title, message, type, duration = 3000 }: NotificationOptions) => {
-    const notification = document.createElement('div');
-    notification.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
-      type === 'success' ? 'bg-green-500 text-white' :
-      type === 'error' ? 'bg-red-500 text-white' :
-      type === 'warning' ? 'bg-yellow-500 text-white' :
-      'bg-blue-500 text-white'
-    }`;
+  const [notifications, setNotifications] = useState<NotificationData[]>([]);
+
+  const showNotification = useCallback(({ 
+    title, 
+    message, 
+    type, 
+    duration = 3000 
+  }: Omit<NotificationData, 'id'> & { duration?: number }) => {
+    const id = Date.now().toString();
+    const newNotification: NotificationData = { id, title, message, type };
     
-    const titleElement = document.createElement('div');
-    titleElement.className = 'font-bold mb-1';
-    titleElement.textContent = title;
-    
-    const messageElement = document.createElement('div');
-    messageElement.className = 'text-sm';
-    messageElement.textContent = message;
-    
-    notification.appendChild(titleElement);
-    notification.appendChild(messageElement);
-    document.body.appendChild(notification);
+    setNotifications(prev => [...prev, newNotification]);
     
     setTimeout(() => {
-      notification.remove();
+      setNotifications(prev => prev.filter(notification => notification.id !== id));
     }, duration);
   }, []);
 
-  return { showNotification };
+  const closeNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
+  }, []);
+
+  return { 
+    notifications, 
+    showNotification, 
+    closeNotification 
+  };
 }; 

@@ -1,8 +1,13 @@
-const Logo = () => {
+interface LogoProps {
+  className?: string;
+}
+
+const Logo = ({ className = '' }: LogoProps) => {
   return (
-    <div className="relative w-12 h-12 animate-planet-rotate">
-      <div className="absolute inset-0 bg-black rounded-full">
-        <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-white opacity-20 rounded-full transform -rotate-45"></div>
+    <div className={`relative ${className}`}>
+      <div className="w-8 h-8 rounded-full border-2 border-primary animate-[spin_3s_linear_infinite]" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-6 h-6 rounded-full bg-primary/20" />
       </div>
     </div>
   );

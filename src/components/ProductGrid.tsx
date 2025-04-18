@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Product } from '../types/product';
+import { Product, ProductSpecs } from '../types/product';
 import { products } from '../data/products';
 import ProductCard from './ProductCard';
 import FilterSection from './FilterSection';
@@ -51,36 +51,99 @@ export function ProductGrid() {
     }
   }, [location.state]);
 
-  const createFilterOptions = (values: string[]): FilterOption[] => {
-    return values.map(value => ({ value, label: value }));
+  const createFilterOptions = (key: keyof ProductSpecs, labelSuffix: string = ""): FilterOption[] => {
+    let values: string[] = [];
+    if (key === 'diameter' || key === 'et') {
+      values = Array.from(new Set(products.flatMap(p => Array.isArray(p.specs[key]) ? p.specs[key] as string[] : [p.specs[key] as string])))
+        .sort((a, b) => Number(a) - Number(b));
+    } else if (key === 'pcd') {
+      values = Array.from(new Set(products.map(p => p.specs.pcd)))
+        .sort();
+    } else {
+      values = Array.from(new Set(products.flatMap(p => {
+        const specValue = p.specs[key as keyof Omit<ProductSpecs, 'diameter' | 'et' | 'pcd'>];
+        return Array.isArray(specValue) ? specValue : [specValue];
+      })))
+        .sort((a, b) => Number(a) - Number(b));
+    }
+    return values.map(value => ({ value, label: `${value}${labelSuffix}` }));
   };
 
-  const filterOptions: FilterOptions = {
-    diameter: createFilterOptions(
-      Array.from(new Set(products.flatMap(p => Array.isArray(p.specs.diameter) ? p.specs.diameter : [p.specs.diameter])))
-        .sort((a, b) => Number(a) - Number(b))
-    ),
-    width: createFilterOptions(
-      Array.from(new Set(products.map(p => p.specs.width)))
-        .sort((a, b) => Number(a) - Number(b))
-    ),
-    pcd: createFilterOptions(
-      Array.from(new Set(products.map(p => p.specs.pcd)))
-        .sort()
-    ),
-    et: createFilterOptions(
-      Array.from(new Set(products.flatMap(p => Array.isArray(p.specs.et) ? p.specs.et : [p.specs.et])))
-        .sort((a, b) => Number(a) - Number(b))
-    ),
-    dia: createFilterOptions(
-      Array.from(new Set(products.map(p => p.specs.dia)))
-        .sort((a, b) => Number(a) - Number(b))
-    )
+  // Получаем доступные товары на основе выбранных фильтров
+  const getAvailableProducts = (filters: Partial<SelectedFilters> = {}): Product[] => {
+    return products.filter(product => {
+      return Object.entries(filters).every(([key, values]) => {
+        if (!values || values.length === 0) return true;
+        const spec = product.specs[key as keyof typeof product.specs];
+        if (Array.isArray(spec)) {
+          return spec.some(s => values.includes(s));
+        }
+        return values.includes(spec);
+      });
+    });
+  };
+
+  // Получаем доступные опции для конкретного фильтра на основе уже выбранных фильтров
+  const getAvailableFilterOptions = (
+    filterKey: keyof SelectedFilters,
+    labelSuffix: string = ""
+  ): FilterOption[] => {
+    // Создаем объект фильтров без текущего фильтра
+    const otherFilters: Partial<SelectedFilters> = Object.entries(selectedFilters)
+      .filter(([key]) => key !== filterKey && key !== 'dia')
+      .reduce((acc, [key, value]) => {
+        if (value.length > 0) {
+          acc[key as keyof SelectedFilters] = value;
+        }
+        return acc;
+      }, {} as Partial<SelectedFilters>);
+
+    // Получаем товары, которые соответствуют всем другим выбранным фильтрам
+    const availableProducts = getAvailableProducts(otherFilters);
+
+    // Извлекаем все возможные значения для текущего фильтра из доступных товаров
+    let availableValues: string[] = [];
+    
+    if (filterKey === 'diameter' || filterKey === 'et') {
+      availableValues = Array.from(new Set(availableProducts.flatMap(p => {
+        const specValue = p.specs[filterKey];
+        return Array.isArray(specValue) ? specValue : [specValue];
+      })));
+    } else if (filterKey === 'pcd') {
+      availableValues = Array.from(new Set(availableProducts.map(p => p.specs.pcd)));
+    } else if (filterKey === 'width') {
+      availableValues = Array.from(new Set(availableProducts.flatMap(p => {
+        const specValue = p.specs.width;
+        return Array.isArray(specValue) ? specValue : [specValue];
+      })));
+    }
+
+    // Сортируем значения (числовые - по значению, строковые - лексикографически)
+    availableValues.sort((a, b) => {
+      if (!isNaN(Number(a)) && !isNaN(Number(b))) {
+        return Number(a) - Number(b);
+      }
+      return a.localeCompare(b);
+    });
+
+    // Создаем объекты опций для компонента
+    return availableValues.map(value => ({ 
+      value, 
+      label: `${value}${labelSuffix}` 
+    }));
+  };
+
+  // Используем динамические списки опций вместо статических
+  const dynamicFilterOptions: Omit<FilterOptions, 'dia'> = {
+    diameter: getAvailableFilterOptions('diameter', '"'),
+    width: getAvailableFilterOptions('width'),
+    pcd: getAvailableFilterOptions('pcd'),
+    et: getAvailableFilterOptions('et'),
   };
 
   const filteredProducts = products.filter(product => {
     return Object.entries(selectedFilters).every(([key, values]) => {
-      if (values.length === 0) return true;
+      if (values.length === 0 || key === 'dia') return true; // Игнорируем dia
       const spec = product.specs[key as keyof typeof product.specs];
       if (Array.isArray(spec)) {
         return spec.some(s => values.includes(s));
@@ -95,33 +158,27 @@ export function ProductGrid() {
         <div className="w-full md:w-1/4 space-y-4">
           <FilterSection
             title="Диаметр (ø)"
-            options={filterOptions.diameter}
+            options={dynamicFilterOptions.diameter}
             selected={selectedFilters.diameter}
             onChange={(values) => setSelectedFilters(prev => ({ ...prev, diameter: values }))}
           />
           <FilterSection
             title="Сверловка (PCD)"
-            options={filterOptions.pcd}
+            options={dynamicFilterOptions.pcd}
             selected={selectedFilters.pcd}
             onChange={(values) => setSelectedFilters(prev => ({ ...prev, pcd: values }))}
           />
           <FilterSection
             title="Ширина (J)"
-            options={filterOptions.width}
+            options={dynamicFilterOptions.width}
             selected={selectedFilters.width}
             onChange={(values) => setSelectedFilters(prev => ({ ...prev, width: values }))}
           />
           <FilterSection
             title="Вылет (ET)"
-            options={filterOptions.et}
+            options={dynamicFilterOptions.et}
             selected={selectedFilters.et}
             onChange={(values) => setSelectedFilters(prev => ({ ...prev, et: values }))}
-          />
-          <FilterSection
-            title="DIA"
-            options={filterOptions.dia}
-            selected={selectedFilters.dia}
-            onChange={(values) => setSelectedFilters(prev => ({ ...prev, dia: values }))}
           />
         </div>
         <div className="w-full md:w-3/4">

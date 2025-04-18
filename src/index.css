@@ -1,176 +1,322 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+  --primary: #007BFF;
+  --primary-dark: #0056b3;
+  --background: #000000;
+  --surface: #1A1A1A;
+  --text: #FFFFFF;
+  --text-secondary: #F0F0F0;
 }
 
-@layer base {
-  * {
-    @apply border-[hsl(var(--border))];
+@layer utilities {
+  .border-primary\/20 {
+    border-color: rgb(0 123 255 / 0.2);
+  }
+  .border-primary\/30 {
+    border-color: rgb(0 123 255 / 0.3);
+  }
+  .border-primary\/40 {
+    border-color: rgb(0 123 255 / 0.4);
+  }
+  .bg-surface\/80 {
+    background-color: rgb(26 26 26 / 0.8);
+  }
+  .bg-surface\/90 {
+    background-color: rgb(26 26 26 / 0.9);
+  }
+  .bg-black\/50 {
+    background-color: rgb(0 0 0 / 0.5);
+  }
+  .shadow-primary\/10 {
+    --tw-shadow-color: rgb(0 123 255 / 0.1);
   }
 
-  body {
-    @apply bg-background text-foreground;
+  @keyframes shine {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes gradient {
+    0% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes glow {
+    0% {
+      transform: translate(-50%, -50%) scale(0.9);
+      opacity: 0.5;
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.1);
+      opacity: 0.8;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(0.9);
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes pulse-slow {
+    0% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.6;
+    }
+    100% {
+      opacity: 0.3;
+    }
+  }
+
+  .animate-shine {
+    animation: shine 2s infinite;
+  }
+
+  .animate-gradient {
+    animation: gradient 3s linear infinite;
+  }
+
+  .animate-glow {
+    animation: glow 8s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
   }
 }
 
-@keyframes highlight {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+@layer components {
+  .product-card {
+    @apply backdrop-blur-sm border rounded-lg p-4 transition-all duration-300;
+    background-color: rgb(26 26 26 / 0.8);
+    border-color: rgb(0 123 255 / 0.2);
   }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4);
+
+  .product-card:hover {
+    background-color: rgb(26 26 26 / 0.9);
+    border-color: rgb(0 123 255 / 0.4);
+    @apply shadow-lg;
+    --tw-shadow-color: rgb(0 123 255 / 0.1);
   }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+
+  .navbar {
+    @apply backdrop-blur-sm border-b sticky top-0 z-50;
+    background-color: rgb(0 0 0 / 0.5);
+    border-color: rgb(0 123 255 / 0.2);
+  }
+
+  .filter-section {
+    @apply backdrop-blur-sm rounded-lg p-4 border sticky top-20;
+    background-color: rgb(26 26 26 / 0.8);
+    border-color: rgb(0 123 255 / 0.2);
+  }
+
+  .review-card {
+    @apply backdrop-blur-sm border rounded-lg p-4 transition-all duration-300;
+    background-color: rgb(26 26 26 / 0.8);
+    border-color: rgb(0 123 255 / 0.2);
+  }
+
+  .review-card:hover {
+    background-color: rgb(26 26 26 / 0.9);
+    border-color: rgb(0 123 255 / 0.4);
+    @apply shadow-lg;
+    --tw-shadow-color: rgb(0 123 255 / 0.1);
+  }
+
+  .delivery-section {
+    @apply backdrop-blur-sm rounded-lg p-6 border mb-6;
+    background-color: rgb(26 26 26 / 0.8);
+    border-color: rgb(0 123 255 / 0.2);
+  }
+
+  .footer {
+    @apply backdrop-blur-sm border-t text-text-secondary mt-auto py-8;
+    background-color: rgb(0 0 0 / 0.5);
+    border-color: rgb(0 123 255 / 0.2);
   }
 }
 
-.highlight-product {
-  animation: highlight 0.5s ease-in-out;
-  border: 2px solid #3b82f6 !important;
-  background-color: rgba(59, 130, 246, 0.1) !important;
-  transition: all 0.3s ease-in-out !important;
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background);
 }
 
-/* Стили для слайдера */
-.swiper-pagination-bullet {
-  width: 12px !important;
-  height: 12px !important;
-  background: rgba(255, 255, 255, 0.5) !important;
-  opacity: 1 !important;
+body {
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  min-height: 100vh;
+  background-color: var(--background);
 }
 
-.swiper-pagination-bullet-active {
-  background: #fff !important;
+/* Container styles */
+.container {
+  @apply max-w-7xl mx-auto px-4;
+  background-color: transparent;
 }
 
-.swiper-button-prev,
-.swiper-button-next {
-  width: 50px !important;
-  height: 50px !important;
-  background: rgba(0, 0, 0, 0.3) !important;
-  border-radius: 50% !important;
-  transition: background-color 0.3s !important;
+.nav-link {
+  @apply text-white hover:text-primary transition-colors;
 }
 
-.swiper-button-prev:hover,
-.swiper-button-next:hover {
-  background: rgba(0, 0, 0, 0.5) !important;
+/* Main content styles */
+h1, h2, h3 {
+  @apply text-white pb-2 mb-4;
+  border-bottom: 2px solid rgb(0 123 255 / 0.3);
 }
 
-.swiper-button-prev::after,
-.swiper-button-next::after {
-  font-size: 24px !important;
+.product-card h3 {
+  @apply text-white border-none;
 }
 
-/* Кастомные стили для выпадающего списка */
+.product-price {
+  @apply text-primary font-bold;
+}
+
+.buy-btn {
+  @apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors w-full disabled:bg-gray-700 disabled:cursor-not-allowed;
+}
+
+.filter-title {
+  @apply text-white font-medium mb-2;
+}
+
+.filter-option {
+  @apply text-text-secondary hover:text-primary cursor-pointer transition-colors;
+}
+
+.filter-option.selected {
+  @apply text-primary;
+}
+
+/* Form elements */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+  @apply bg-surface text-white border rounded-lg px-4 py-2 focus:outline-none transition-colors;
+  border-color: rgb(0 123 255 / 0.2);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:bg-gray-700;
+}
+
+.btn-outline {
+  @apply border text-primary px-6 py-2 rounded-lg hover:bg-primary hover:text-white transition-colors;
+  border-color: var(--primary);
+}
+
+.review-meta {
+  @apply text-text-secondary text-sm;
+}
+
+.review-rating {
+  @apply text-primary;
+}
+
+.review-content {
+  @apply text-text mt-2;
+}
+
+.delivery-title {
+  @apply text-xl font-bold text-white mb-4 border-none;
+}
+
+.delivery-content {
+  @apply text-text-secondary space-y-4;
+}
+
+.footer-title {
+  @apply text-white font-medium mb-4 border-none;
+}
+
+.footer-link {
+  @apply text-text-secondary hover:text-primary transition-colors;
+}
+
+.social-icon {
+  @apply text-primary hover:text-primary-dark transition-colors;
+}
+
+/* Mobile adaptations */
+@media (max-width: 768px) {
+  .product-card {
+    @apply w-full;
+  }
+  
+  .btn-primary, .btn-outline {
+    @apply w-full mb-2;
+  }
+  
+  .container {
+    @apply px-4;
+  }
+  
+  .delivery-section {
+    @apply p-4;
+  }
+}
+
+/* Custom Select Styles */
+.custom-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Стили для выпадающих опций в селектах */
 select option {
-  background-color: white;
-  padding: 0.5rem 1rem;
-  border: 1px solid #e5e7eb;
-  margin: -1px;
+  background-color: #000000;
+  color: white;
+  padding: 8px;
 }
 
-select option:not(:last-child) {
-  border-bottom: 1px solid #e5e7eb;
+/* Стили для Firefox */
+select {
+  -moz-appearance: none;
+  background-color: var(--surface) !important;
 }
 
-select option:hover {
-  background-color: #f3f4f6;
+/* Стили для Chrome/Safari */
+select::-ms-expand {
+  display: none;
 }
 
-/* Стили для выбранной опции */
+/* Выделение опций при наведении */
+select option:hover,
+select option:focus,
+select option:active,
 select option:checked {
-  background-color: #eff6ff;
-  color: #1d4ed8;
+  background-color: var(--primary);
+  color: white;
 }
